@@ -17,9 +17,9 @@ SIZE = 256, 256
 class LabelTool():
     def __init__(self, master):
         # set up the main frame
-        self.parent = master
-        self.parent.title("LabelTool")
-        self.parent.resizable(width=True, height=True)
+        self.rootPanel = master
+        self.rootPanel.title("az Image Annotations")
+        self.rootPanel.resizable(width=False, height=False)
 
         # initialize global state
         self.imageDir = ''
@@ -48,62 +48,64 @@ class LabelTool():
 
         # ----------------- GUI stuff ---------------------
 
+        # Empty label
+        self.lblAlign = Label(self.rootPanel, text='  \n  ', bg='green')
+        self.lblAlign.grid(column=0, row=0, rowspan=100, sticky=W)
+        
         # Top panel stuff
-        self.ctrTopPanel = Frame(self.parent).grid(row=5, column=6)
-
-        # dir entry & load
-        # input image dir button
-        self.srcDirBtn = Button(self.ctrTopPanel, text="Image input folder", command=self.selectSrcDir).grid(row=0, column=0)
+        self.ctrTopPanel = Frame(self.rootPanel)
+        self.ctrTopPanel.grid(row=0, column=1, sticky=W+N)
+        Button(self.ctrTopPanel, text="Image input folder", command=self.selectSrcDir, ).grid(row=0, column=0)
 
         # input image dir entry
         self.svSourcePath = StringVar()
-        self.entrySrc = Entry(self.ctrTopPanel, textvariable=self.svSourcePath).grid(row=0, column=1, sticky=W+E)
+        self.entrySrc = Entry(self.ctrTopPanel, textvariable=self.svSourcePath, width=70)
+        self.entrySrc.grid(row=0, column=1, sticky=W+E)
         self.svSourcePath.set(os.path.join(os.getcwd(), "images"))
 
         # filter
         self.filterVar = StringVar()
-        self.filterEntry = Entry(self.ctrTopPanel, textvariable=self.filterVar).grid(row=1, column=0, sticky=W+E)
+        Entry(self.ctrTopPanel, textvariable=self.filterVar, width=10).grid(row=0, column=2, sticky=W+E)
         self.filterVar.set('-rgb')
 
-        self.imageFileName = Label(self.ctrTopPanel, text="Current filename: <name>")
-        self.imageFileName.grid(row=1, column=1)
+        self.bLoad = Button(self.ctrTopPanel, text="Load Dir", command=self.loadDir).grid(row=0, column=3, rowspan=1, padx=2, pady=2, ipadx=5, ipady=5)
+        self.lblFilename = Label(self.ctrTopPanel, text="Current filename: <name>", justify=LEFT, anchor="w").grid(row=1, column=0, columnspan=2, sticky=W)
         
-
-        # load button
-        self.ldBtn = Button(self.parent, text="Load Dir", command=self.loadDir).grid(row=0, column=2, padx=2, pady=2, ipadx=5, ipady=5)
-
         # main panel for labeling
-        self.mainPanel = Canvas(self.parent, cursor='tcross')
-        self.mainPanel.grid(row=2, column=0, rowspan=4, columnspan=2, sticky=W+N)
+        self.mainPanel = Canvas(self.rootPanel, cursor='tcross')
+        self.mainPanel.grid(row=1, column=1, sticky=W+N)
         self.mainPanel.bind("<Button-1>", self.mouseClick)
         self.mainPanel.bind("<Motion>", self.mouseMove)
-        self.parent.bind("<Escape>", self.cancelBBox)  # press <Espace> to cancel current bbox
-        self.parent.bind("c", self.cancelBBox)
-        self.parent.bind("a", self.prevImage)  # press 'a' to go backforward
-        self.parent.bind("d", self.nextImage)  # press 'd' to go forward
+        self.rootPanel.bind("<Escape>", self.cancelBBox)  # press <Espace> to cancel current bbox
+        self.rootPanel.bind("c", self.cancelBBox)
+        self.rootPanel.bind("a", self.prevImage)  # press 'a' to go backforward
+        self.rootPanel.bind("d", self.nextImage)  # press 'd' to go forward
 
-        # choose class
-        self.classname = StringVar()
-        self.classcandidate = ttk.Combobox(self.parent, state='readonly', textvariable=self.classname)
-        self.classcandidate.grid(row=2, column=2)
+        # Class panel
+        self.ctrClassPanel = Frame(self.rootPanel)
+        self.ctrClassPanel.grid(row=1, column=2, sticky="e")
+
+        self.className = StringVar()
+        self.classCandidate = ttk.Combobox(self.ctrClassPanel, state='readonly', textvariable=self.className)
+        self.classCandidate.grid(row=2, column=2)
         if os.path.exists(self.classcandidate_filename):
             with open(self.classcandidate_filename) as cf:
                 for line in cf.readlines():
                     self.cla_can_temp.append(line.strip('\n'))
-        self.classcandidate['values'] = self.cla_can_temp
-        self.classcandidate.current(0)
-        self.currentLabelclass = self.classcandidate.get()
-        self.btnclass = Button(self.parent, text='ComfirmClass', command=self.setClass).grid(row=2, column=3, sticky=W+E)
+        self.classCandidate['values'] = self.cla_can_temp
+        self.classCandidate.current(0)
+        self.currentLabelclass = self.classCandidate.get()
+        self.btnclass = Button(self.ctrClassPanel, text='ComfirmClass', command=self.setClass).grid(row=2, column=3, sticky=W+E)
 
         # showing bbox info & delete bbox
-        self.lb1 = Label(self.parent, text='Bounding boxes:').grid(row=3, column=2,  sticky=W+N)
-        self.listbox = Listbox(self.parent, width=22, height=12).grid(row=4, column=2, sticky=N+S)
-        self.btnDel = Button(self.parent, text='Delete', command=self.delBBox).grid(row=4, column=3, sticky=W+E+N)
-        self.btnClear = Button(self.parent, text='ClearAll', command=self.clearBBox).grid(row=4, column=3, sticky=W+E+S)
+        Label(self.ctrClassPanel, text='Bounding boxes:').grid(row=3, column=2,  sticky=W+N)
+        self.classList = Listbox(self.ctrClassPanel, width=22, height=12).grid(row=4, column=2, sticky=N+S)
+        Button(self.ctrClassPanel, text='Delete', command=self.delBBox).grid(row=4, column=3, sticky=W+E+N)
+        Button(self.ctrClassPanel, text='ClearAll', command=self.clearBBox).grid(row=4, column=3, sticky=W+E+S)
 
         # control panel for image navigation
-        self.ctrBottomPanel = Frame(self.parent)
-        self.ctrBottomPanel.grid(row=6, column=1, columnspan=2, sticky=W+E)
+        self.ctrBottomPanel = Frame(self.rootPanel)
+        self.ctrBottomPanel.grid(row=2, column=1, columnspan=2, sticky=W+E)
         self.prevBtn = Button(self.ctrBottomPanel, text='<< Prev', width=10, command=self.prevImage)
         self.prevBtn.pack(side=LEFT, padx=5, pady=3)
         self.nextBtn = Button(self.ctrBottomPanel, text='Next >>', width=10, command=self.nextImage)
@@ -120,8 +122,8 @@ class LabelTool():
         # display mouse position
         self.disp=Label(self.ctrBottomPanel, text='')
         self.disp.pack(side=RIGHT)
-        self.parent.columnconfigure(5, weight=1)
-        self.parent.rowconfigure(6, weight=1)
+        self.rootPanel.columnconfigure(5, weight=1)
+        self.rootPanel.rowconfigure(6, weight=1)
 
     def selectSrcDir(self):
         path = filedialog.askdirectory(title="Select image source folder", initialdir=self.svSourcePath.get())
@@ -129,7 +131,7 @@ class LabelTool():
         return
 
     def loadDir(self):
-        self.parent.focus()
+        self.rootPanel.focus()
         # get image list
         #self.imageDir = os.path.join(r'./Images', '%03d' %(self.category))
         self.imageDir = self.svSourcePath.get()
@@ -177,7 +179,6 @@ class LabelTool():
         #     self.egLabels[i].config(image=self.egList[-1], width=SIZE[0], height=SIZE[1])
 
         self.loadImage()
-        print('%d images loaded from %s' %(self.total, self.imageDir))
 
     def loadImage(self):
         # load image
@@ -187,10 +188,10 @@ class LabelTool():
         self.factor = max(size[0]/1000, size[1]/1000., 1.)
         self.img = self.img.resize((int(size[0]/self.factor), int(size[1]/self.factor)))
         self.tkimg = ImageTk.PhotoImage(self.img)
-        self.mainPanel.config(width=max(self.tkimg.width(), 400), height=max(self.tkimg.height(), 400))
+        self.mainPanel.config(width=max(self.tkimg.width(), 800), height=max(self.tkimg.height(), 400))
         self.mainPanel.create_image(0, 0, image=self.tkimg, anchor=N+W)
         self.progLabel.config(text=f"{self.cur}//{self.total}")
-        self.imageFileName.config(text=f"Filename: {imagePath}")
+        self.lblFilename.config(text=f"Filename: {imagePath}")
 
         return
     
@@ -222,8 +223,8 @@ class LabelTool():
                                                             outline = COLORS[color_index])
                                                             #outline = COLORS[(len(self.bboxList)-1) % len(COLORS)])
                     self.bboxIdList.append(tmpId)
-                    self.listbox.insert(END, '%s : (%d, %d) -> (%d, %d)' %(tmp[4], tmp[0], tmp[1], tmp[2], tmp[3]))
-                    self.listbox.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[color_index])
+                    self.classList.insert(END, '%s : (%d, %d) -> (%d, %d)' %(tmp[4], tmp[0], tmp[1], tmp[2], tmp[3]))
+                    self.classList.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[color_index])
                     # self.listbox.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
 
     def saveImage(self):
@@ -250,8 +251,8 @@ class LabelTool():
             self.bboxList.append((x1, y1, x2, y2, self.currentLabelclass))
             self.bboxIdList.append(self.bboxId)
             self.bboxId = None
-            self.listbox.insert(END, '%s : (%d, %d) -> (%d, %d)' %(self.currentLabelclass, x1, y1, x2, y2))
-            self.listbox.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
+            self.classList.insert(END, '%s : (%d, %d) -> (%d, %d)' %(self.currentLabelclass, x1, y1, x2, y2))
+            self.classList.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
         self.STATE['click'] = 1 - self.STATE['click']
 
     def mouseMove(self, event):
@@ -280,19 +281,19 @@ class LabelTool():
                 self.STATE['click'] = 0
 
     def delBBox(self):
-        sel = self.listbox.curselection()
+        sel = self.classList.curselection()
         if len(sel) != 1 :
             return
         idx = int(sel[0])
         self.mainPanel.delete(self.bboxIdList[idx])
         self.bboxIdList.pop(idx)
         self.bboxList.pop(idx)
-        self.listbox.delete(idx)
+        self.classList.delete(idx)
 
     def clearBBox(self):
         for idx in range(len(self.bboxIdList)):
             self.mainPanel.delete(self.bboxIdList[idx])
-        self.listbox.delete(0, len(self.bboxList))
+        self.classList.delete(0, len(self.bboxList))
         self.bboxIdList = []
         self.bboxList = []
 
@@ -316,7 +317,7 @@ class LabelTool():
             self.loadImage()
 
     def setClass(self):
-        self.currentLabelclass = self.classcandidate.get()
+        self.currentLabelclass = self.classCandidate.get()
         print('set label class to : %s' % self.currentLabelclass)
 
 
