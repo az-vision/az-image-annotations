@@ -9,6 +9,7 @@
         "rowspan",
         "tcross",
         "textvariable",
+        "tkimg",
         "ultralytics"
     ],
     "python.linting.flake8Args": [
