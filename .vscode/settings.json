@@ -1,5 +1,18 @@
 {
     "cSpell.words": [
+        "columnspan",
+        "Espace",
+        "ipadx",
+        "ipady",
+        "padx",
+        "pady",
+        "rowspan",
+        "tcross",
+        "textvariable",
         "ultralytics"
-    ]
+    ],
+    "python.linting.flake8Args": [
+        "--max-line-length=140",
+        //"--ignore=E402,F841,F401,E302,E305",
+    ],
 }
