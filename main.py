@@ -69,7 +69,8 @@ class LabelTool():
         self.filterVar.set('-rgb')
 
         self.bLoad = Button(self.ctrTopPanel, text="Load Dir", command=self.loadDir).grid(row=0, column=3, rowspan=1, padx=2, pady=2, ipadx=5, ipady=5)
-        self.lblFilename = Label(self.ctrTopPanel, text="Current filename: <name>", justify=LEFT, anchor="w").grid(row=1, column=0, columnspan=2, sticky=W)
+        self.lblFilename = Label(self.ctrTopPanel, text="Current filename: <name>", justify=LEFT, anchor="w")
+        self.lblFilename.grid(row=1, column=0, columnspan=2, sticky=W)
         
         # main panel for labeling
         self.mainPanel = Canvas(self.rootPanel, cursor='tcross')
