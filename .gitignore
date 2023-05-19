@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 # Folder containing images to annotate
-images/
+annotations/

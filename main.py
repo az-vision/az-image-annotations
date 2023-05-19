@@ -31,7 +31,7 @@ class LabelTool():
         self.labelfilename = ''
         self.tkimg = None
         self.currentLabelClass = ''
-        self.cla_can_temp = []
+        self.classesList = []
         self.classCandidateFilename = 'class.txt'
 
         # initialize mouse state
@@ -46,7 +46,7 @@ class LabelTool():
         # ----------------- GUI stuff ---------------------
 
         # Empty label
-        self.lblAlign = Label(self.rootPanel, text='  \n  ', bg='green')
+        self.lblAlign = Label(self.rootPanel, text='  \n  ')
         self.lblAlign.grid(column=0, row=0, rowspan=100, sticky=W)
         
         # Top panel stuff
@@ -57,7 +57,7 @@ class LabelTool():
         # input image dir entry
         self.svSourcePath = StringVar()
         Entry(self.ctrTopPanel, textvariable=self.svSourcePath, width=70).grid(row=0, column=1, sticky=W+E, padx=5)
-        self.svSourcePath.set(os.path.join(os.getcwd(), "images"))
+        self.svSourcePath.set(os.path.join(os.getcwd(), "annotations", "images"))
 
         # filter
         self.filterVar = StringVar()
@@ -90,45 +90,54 @@ class LabelTool():
 
         # Class panel
         self.ctrClassPanel = Frame(self.rootPanel)
-        self.ctrClassPanel.grid(row=1, column=2, sticky=E)
+        self.ctrClassPanel.grid(row=1, column=2, sticky=W+N)
 
-        Label(self.ctrClassPanel, text='Current class:').grid(row=1, column=1, sticky=W)
+        Label(self.ctrClassPanel, text='Current class:').grid(row=1, column=0, sticky=W)
         self.className = StringVar()
         self.classCandidate = ttk.Combobox(self.ctrClassPanel, state='readonly', textvariable=self.className)
-        self.classCandidate.grid(row=2, column=1, sticky=W)
+        self.classCandidate.grid(row=2, column=0, sticky=W)
         if os.path.exists(self.classCandidateFilename):
             with open(self.classCandidateFilename) as cf:
                 for line in cf.readlines():
-                    self.cla_can_temp.append(line.strip('\n'))
-        self.classCandidate['values'] = self.cla_can_temp
+                    self.classesList.append(line.strip('\n'))
+        self.classCandidate['values'] = self.classesList
         self.classCandidate.current(0)
         self.currentLabelClass = self.classCandidate.get()
 
         # showing bbox info & delete bbox
-        Label(self.ctrClassPanel, text='Annotations:').grid(row=3, column=1,  sticky=W+N)
-        Button(self.ctrClassPanel, text='Delete Selected', command=self.delBBox).grid(row=4, column=1, sticky=W+E+N)
-        self.classList = Listbox(self.ctrClassPanel, width=50, height=12)
-        self.classList.grid(row=5, column=1, sticky=N+S)
-        Button(self.ctrClassPanel, text='Clear All', command=self.clearBBox).grid(row=6, column=1, sticky=W+E+S)
+        Label(self.ctrClassPanel, text='Annotations:').grid(row=3, column=0,  sticky=W+N)
+        Button(self.ctrClassPanel, text='Delete Selected', command=self.delBBox).grid(row=4, column=0, sticky=W+E+N)
+        Button(self.ctrClassPanel, text='Clear All', command=self.clearBBox).grid(row=4, column=1, sticky=W+E+S)
+        self.annotationsList = Listbox(self.ctrClassPanel, width=60, height=12)
+        self.annotationsList.grid(row=5, column=0, columnspan=2, sticky=N+S+W)
 
-        # control panel for image navigation
-        self.ctrBottomPanel = Frame(self.rootPanel)
-        self.ctrBottomPanel.grid(row=4, column=1, columnspan=2, sticky=W+E)
-        self.prevBtn = Button(self.ctrBottomPanel, text='<< Prev', width=10, command=self.prevImage)
-        self.prevBtn.pack(side=LEFT, padx=5, pady=3)
-        self.nextBtn = Button(self.ctrBottomPanel, text='Next >>', width=10, command=self.nextImage)
-        self.nextBtn.pack(side=LEFT, padx=5, pady=3)
-        self.progLabel = Label(self.ctrBottomPanel, text="Progress:     /    ")
-        self.progLabel.pack(side=LEFT, padx=5)
-        self.tmpLabel = Label(self.ctrBottomPanel, text="Go to Image No.")
+        # control panel GoTo
+
+        Label(self.ctrClassPanel, text='  \n  ').grid(row=7, column=0, columnspan=2)
+
+        self.ctrGoToPanel = Frame(self.ctrClassPanel)
+        self.ctrGoToPanel.grid(row=8, column=0, columnspan=2, sticky=W+E)
+        self.tmpLabel = Label(self.ctrGoToPanel, text="Go to Image No.")
         self.tmpLabel.pack(side=LEFT, padx=5)
-        self.idxEntry = Entry(self.ctrBottomPanel, width=5)
+        self.idxEntry = Entry(self.ctrGoToPanel, width=5)
         self.idxEntry.pack(side=LEFT)
-        self.goBtn = Button(self.ctrBottomPanel, text='Go', command=self.gotoImage)
+        self.goBtn = Button(self.ctrGoToPanel, text='Go', command=self.gotoImage)
         self.goBtn.pack(side=LEFT)
 
+        Label(self.ctrClassPanel, text='  \n  ').grid(row=9, column=0, columnspan=2)
+
+        # Navigation control panel
+        self.ctrNavigatePanel = Frame(self.ctrClassPanel)
+        self.ctrNavigatePanel.grid(row=10, column=0, columnspan=2, sticky=W+E)
+        self.prevBtn = Button(self.ctrNavigatePanel, text='<< Prev (a)', width=10, command=self.prevImage)
+        self.prevBtn.pack(side=LEFT, padx=5, pady=3)
+        self.nextBtn = Button(self.ctrNavigatePanel, text='(d) Next >>', width=10, command=self.nextImage)
+        self.nextBtn.pack(side=LEFT, padx=5, pady=3)
+        self.progLabel = Label(self.ctrNavigatePanel, text="Progress:     /    ")
+        self.progLabel.pack(side=LEFT, padx=5)
+
         # display mouse position
-        self.disp = Label(self.ctrBottomPanel, text='')
+        self.disp = Label(self.ctrNavigatePanel, text='')
         self.disp.pack(side=RIGHT)
         self.rootPanel.columnconfigure(5, weight=1)
         self.rootPanel.rowconfigure(6, weight=1)
@@ -146,6 +155,10 @@ class LabelTool():
         if not os.path.isdir(self.imageDir):
             messagebox.showerror("Error!", message="The specified dir doesn't exist!")
             return
+        
+        self.labelsDir = os.path.join(self.imageDir, '..', 'labels')
+        if not os.path.isdir(self.labelsDir):
+            os.makedirs(self.labelsDir, exist_ok=True)
 
         self.fileNameTrailings = self.filterVar.get().split("|")
         self.fileNameExt = ".jpg"
@@ -192,50 +205,40 @@ class LabelTool():
         self.loadImage()
 
     def loadImage(self):
-        self.tkimg = [0,0]
+        self.tkimg = [0, 0, 0]
         # load image
-        imgRootName = self.imageList[self.cur - 1]
-        for panelNo in range(0, 2):
-            imgFilePath = os.path.join(self.imageDir, imgRootName + self.fileNameTrailings[panelNo] + self.fileNameExt)
+        self.imgRootName = self.imageList[self.cur - 1]
+        for panelNo in range(0, 3):
+            imgFilePath = os.path.join(self.imageDir, self.imgRootName + self.fileNameTrailings[panelNo] + self.fileNameExt)
             self.tkimg[panelNo] = self.loadImgFromDisk(imgFilePath)
-            self.mainPanels[panelNo].config(width=max(self.tkimg[panelNo].width(), 800), height=max(self.tkimg[panelNo].height(), 400))
+            self.mainPanels[panelNo].config(width=max(self.tkimg[panelNo].width(), 10), height=max(self.tkimg[panelNo].height(), 10))
             self.mainPanels[panelNo].create_image(0, 0, image=self.tkimg[panelNo], anchor=N+W)
 
         self.progLabel.config(text=f"{self.cur}/{self.total}")
-        self.lblFilename.config(text=f"Filename: {imgFilePath}")
+        self.lblFilename.config(text=f"Filename: {self.imgRootName}")
 
         self.clearBBox()
-        return
 
         # load labels
-        # self.imagename = os.path.split(imagepath)[-1].split('.')[0]
-        fullfilename = os.path.basename(imgRootName)
-        self.imagename, _ = os.path.splitext(fullfilename)
-        labelname = self.imagename + '.txt'
-        self.labelfilename = os.path.join(self.outDir, labelname)
-        bbox_cnt = 0
-        if os.path.exists(self.labelfilename):
-            with open(self.labelfilename) as f:
+        annotationFilePath, imgWidth, imgHeight = self.get_annotations_metadata()
+
+        if os.path.exists(annotationFilePath):
+            with open(annotationFilePath) as f:
                 for i, line in enumerate(f):
-                    # if i == 0:
-                    #     bbox_cnt = int(line.strip())
-                    #     continue
-                    # tmp = [int(t.strip()) for t in line.split()]
                     tmp = line.split()
-                    tmp[0] = int(int(tmp[0])/self.factor)
-                    tmp[1] = int(int(tmp[1])/self.factor)
-                    tmp[2] = int(int(tmp[2])/self.factor)
-                    tmp[3] = int(int(tmp[3])/self.factor)
-                    self.bboxList.append(tuple(tmp))
-                    color_index = (len(self.bboxList)-1) % len(COLORS)
-                    tmpId = self.mainPanel.create_rectangle(tmp[0], tmp[1],
-                                                            tmp[2], tmp[3],
-                                                            width = 2,
-                                                            outline = COLORS[color_index])
-                                                            #outline = COLORS[(len(self.bboxList)-1) % len(COLORS)])
-                    self.bboxIdList.append(tmpId)
-                    self.classList.insert(END, '%s : (%d, %d) -> (%d, %d)' %(tmp[4], tmp[0], tmp[1], tmp[2], tmp[3]))
-                    self.classList.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[color_index])
+                    classIndex = int(tmp[0])
+                    cx = int(float(tmp[1])*imgWidth)
+                    cy = int(float(tmp[2])*imgHeight)
+                    hw = int(float(tmp[3])*imgWidth/2)
+                    hh = int(float(tmp[4])*imgHeight/2)
+                    x1 = cx - hw
+                    y1 = cy - hh
+                    x2 = cx + hw
+                    y2 = cy + hh
+
+                    bboxId = self.createBBox(x1, y1, x2, y2)
+                    self.annotationsList.insert(END, f"{{'x1':{x1}, 'y1':{y1}, 'class': '{self.classesList[classIndex]}', 'x2': {x2}, 'y2': {y2}, 'bboxId':{bboxId}  }}")
+                    # self.annotationsList.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[color_index])
 
     def loadImgFromDisk(self, fullFilePath):
         loaded_img = Image.open(fullFilePath)
@@ -243,33 +246,44 @@ class LabelTool():
         img_factor = max(size[0]/1000, size[1]/1000., 1.)
         loaded_img = loaded_img.resize((int(size[0]/img_factor), int(size[1]/img_factor)))
         return ImageTk.PhotoImage(loaded_img)
-        
+
     def saveImage(self):
-        return
-        if self.labelfilename == '':
+        if self.imgRootName == '':
             return
-        with open(self.labelfilename, 'w') as f:
-            f.write('%d\n' %len(self.bboxList))
-            for bbox in self.bboxList:
-                f.write("{} {} {} {} {}\n".format(int(int(bbox[0])*self.factor),
-                                                int(int(bbox[1])*self.factor),
-                                                int(int(bbox[2])*self.factor),
-                                                int(int(bbox[3])*self.factor), bbox[4]))
-                #f.write(' '.join(map(str, bbox)) + '\n')
-        print('Image No. %d saved' %(self.cur))
+
+        annotationFilePath, imgWidth, imgHeight = self.get_annotations_metadata()
+        annotations = self.annotationsList.get(0, END)
+
+        with open(annotationFilePath, 'w') as f:
+            for annotationListItem in annotations:
+                annotation = ast.literal_eval(annotationListItem)
+                class_ = self.classesList.index(annotation['class'])
+                centerX = (annotation['x1'] + annotation['x2']) / 2. / imgWidth
+                centerY = (annotation['y1'] + annotation['y2']) / 2. / imgHeight
+                height = abs(annotation['x1'] - annotation['x2']) * 1. / imgWidth
+                width = abs(annotation['y1'] - annotation['y2']) * 1. / imgHeight
+    
+                f.write(f'{class_} {centerX} {centerY} {height} {width}\n')
+
+    def get_annotations_metadata(self):
+        annotationFileName = self.imgRootName + self.fileNameTrailings[0]
+        annotationFilePath = os.path.join(self.labelsDir, annotationFileName + ".txt")
+        imgWidth, imgHeight = self.tkimg[0].width(), self.tkimg[0].height()
+        return annotationFilePath, imgWidth, imgHeight
 
     def mouseClick(self, event):
         if self.STATE == {}:
             self.STATE['x1'], self.STATE['y1'], self.STATE['class'] = event.x, event.y, self.currentLabelClass
         else:
             self.STATE['x2'], self.STATE['y2'] = event.x, event.y
-            bboxId = self.mainPanels[0].create_rectangle(self.STATE['x1'], self.STATE['y1'],
-                                                         self.STATE['x2'], self.STATE['y2'],
-                                                         width=2,
-                                                         outline=COLORS[0])
+            bboxId = self.createBBox(self.STATE['x1'], self.STATE['y1'], self.STATE['x2'], self.STATE['y2'])
             self.STATE['bboxId'] = bboxId
-            self.classList.insert(END, self.STATE)
+            self.annotationsList.insert(END, self.STATE)
             self.STATE = {}
+
+    def createBBox(self, x1, y1, x2, y2):
+        bboxId = self.mainPanels[0].create_rectangle(x1, y1, x2, y2, width=2, outline=COLORS[0])
+        return bboxId
 
     def mouseMove(self, event):
         self.disp.config(text='x: %d, y: %d' %(event.x, event.y))
@@ -295,14 +309,14 @@ class LabelTool():
         self.STATE = {}
 
     def delBBox(self):
-        for cur_item in self.classList.curselection()[::-1]:
+        for cur_item in self.annotationsList.curselection()[::-1]:
             idx = int(cur_item)
-            bboxToRemove = ast.literal_eval(self.classList.get(idx, idx)[0])['bboxId']
+            bboxToRemove = ast.literal_eval(self.annotationsList.get(idx, idx)[0])['bboxId']
             self.mainPanels[0].delete(bboxToRemove)
-            self.classList.delete(idx)
+            self.annotationsList.delete(idx)
 
     def clearBBox(self):
-        self.classList.select_set(0, END)
+        self.annotationsList.select_set(0, END)
         self.delBBox()
 
     def prevImage(self, event=None):
