@@ -5,11 +5,32 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run",
+            "name": "Annotate",
+            "stopOnEntry": false,
             "type": "python",
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
-            "program": "main.py",
+            "program": "annotate.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Split",
+            "stopOnEntry": false,
+            "type": "python",
+            "python": "${workspaceFolder}/.venv/scripts/python.exe",
+            "request": "launch",
+            "program": "split.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Train",
+            "stopOnEntry": false,
+            "type": "python",
+            "python": "${workspaceFolder}/.venv2/scripts/python.exe",
+            "request": "launch",
+            "program": "train.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }

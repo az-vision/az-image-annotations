@@ -122,6 +122,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv2
 env/
 venv/
 ENV/
@@ -161,3 +162,11 @@ cython_debug/
 
 # Folder containing images to annotate
 annotations/
+
+# Folders containing images for training
+training/train
+training/valid
+training/test
+
+# Results of NN training
+runs/
