@@ -7,6 +7,7 @@ import os
 import pathlib
 from ultralytics import YOLO
 import torch
+from wakepy import keepawake
 
 
 def main(args, loglevel):
@@ -26,18 +27,21 @@ def main(args, loglevel):
     model = YOLO('models/best.pt')
 
     # Training.
-    _ = model.train(
-        data=os.path.join(training_dir, 'data.yaml'),
-        imgsz=416,
-        epochs=10,
-        batch=8,
-        name='heads_trained')
+    with keepawake(keep_screen_awake=False):
+        _ = model.train(
+            data=os.path.join(training_dir, 'data.yaml'),
+            imgsz=416,
+            epochs=args.epochs,
+            batch=8,
+            name='heads_trained')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Train NN")
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
     parser.add_argument("-t", "--training_dir", default="training", help="Directory where training (output) folder is located")
+    parser.add_argument("-e", "--epochs", default=100, help="Number of epochs to train")
+
     args = parser.parse_args()
 
     # Setup logging

@@ -4,6 +4,7 @@
         "Espace",
         "ipadx",
         "ipady",
+        "keepawake",
         "padx",
         "pady",
         "rowspan",
@@ -11,7 +12,9 @@
         "textvariable",
         "tkimg",
         "ultralytics",
-        "xyxy"
+        "wakepy",
+        "xyxy",
+        "YOLO"
     ],
     "python.linting.flake8Args": [
         "--max-line-length=140",
