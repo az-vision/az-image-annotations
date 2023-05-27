@@ -1,5 +1,6 @@
 import ast
 import json
+import pathlib
 from tkinter import END, LEFT, N, RIGHT, S, W, E, StringVar, Tk
 from tkinter import filedialog, Button, Canvas, Entry, Frame, Label, Listbox
 from tkinter import messagebox
@@ -34,6 +35,15 @@ class LabelTool():
         self.currentLabelClass = ''
         self.classesList = []
         self.classCandidateFilename = 'class.txt'
+        self.data_repo = "az-datasets"
+        self.annotations_dir = "annotations"
+        self.annotations_batch = "2023-05-11-07_55_46-rgb-depth-fg_mask"
+
+        self.data_repo_path = os.path.join(str(pathlib.Path(__file__).parent.resolve().parent),  # parent dir
+                                           self.data_repo)
+        self.default_images_filepath = os.path.join(self.data_repo_path,
+                                                    self.annotations_dir,
+                                                    self.annotations_batch)
 
         # initialize mouse state
         self.STATE = {}
@@ -58,7 +68,7 @@ class LabelTool():
         # input image dir entry
         self.svSourcePath = StringVar()
         Entry(self.ctrTopPanel, textvariable=self.svSourcePath, width=70).grid(row=0, column=1, sticky=W+E, padx=5)
-        self.svSourcePath.set(os.path.join(os.getcwd(), "annotations", "images"))
+        self.svSourcePath.set(self.default_images_filepath)
 
         # filter
         self.filterVar = StringVar()
@@ -150,14 +160,13 @@ class LabelTool():
 
     def loadDir(self):
         self.rootPanel.focus()
-        # get image list
-        # self.imageDir = os.path.join(r'./Images', '%03d' %(self.category))
+
         self.imageDir = self.svSourcePath.get()
         if not os.path.isdir(self.imageDir):
             messagebox.showerror("Error!", message="The specified dir doesn't exist!")
             return
 
-        self.labelsDir = os.path.join(self.imageDir, '..', 'labels')
+        self.labelsDir = os.path.join(self.imageDir, 'labels')
         if not os.path.isdir(self.labelsDir):
             os.makedirs(self.labelsDir, exist_ok=True)
 
@@ -178,9 +187,8 @@ class LabelTool():
         self.cur = 1
         self.total = len(self.imageList)
 
-
         # Load a model
-        self.model = YOLO("models/best.pt")
+        self.model = YOLO(os.path.join(self.data_repo_path, "models", "best.pt"))
 
         self.loadImage()
 

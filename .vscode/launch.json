@@ -15,12 +15,12 @@
             "justMyCode": true
         },
         {
-            "name": "Split",
+            "name": "Process",
             "stopOnEntry": false,
             "type": "python",
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
-            "program": "split.py",
+            "program": "process.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },
