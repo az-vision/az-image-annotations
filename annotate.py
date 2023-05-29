@@ -98,6 +98,8 @@ class LabelTool():
         self.rootPanel.bind("c", self.cancelBBox)
         self.rootPanel.bind("a", self.prevImage)  # press 'a' to go backward
         self.rootPanel.bind("d", self.nextImage)  # press 'd' to go forward
+        self.rootPanel.bind("x", self.clearBBox)  # press 'x' to go forward
+
 
         # Class panel
         self.ctrClassPanel = Frame(self.rootPanel)
@@ -118,7 +120,7 @@ class LabelTool():
         # showing bbox info & delete bbox
         Label(self.ctrClassPanel, text='Annotations:').grid(row=3, column=0,  sticky=W+N)
         Button(self.ctrClassPanel, text='Delete Selected', command=self.delBBox).grid(row=4, column=0, sticky=W+E+N)
-        Button(self.ctrClassPanel, text='Clear All', command=self.clearBBox).grid(row=4, column=1, sticky=W+E+S)
+        Button(self.ctrClassPanel, text='Clear All (x)', command=self.clearBBox).grid(row=4, column=1, sticky=W+E+S)
         self.annotationsList = Listbox(self.ctrClassPanel, width=60, height=12)
         self.annotationsList.grid(row=5, column=0, columnspan=2, sticky=N+S+W)
 
@@ -325,7 +327,7 @@ class LabelTool():
             self.mainPanels[0].delete(bboxToRemove)
             self.annotationsList.delete(idx)
 
-    def clearBBox(self):
+    def clearBBox(self, event=None):
         self.annotationsList.select_set(0, END)
         self.delBBox()
 

@@ -2,4 +2,5 @@ pillow == 9.5.0
 ultralytics == 8.0.99
 wakepy
 
+# for cuda enabled training
 # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
