@@ -23,8 +23,9 @@ def main(args, loglevel):
     logging.info(f"Source labels path: {source_labels_path}")
     training_path = os.path.join(annotations_repo_path, args.training_dir)
 
-    # Create destination training directories
+    # Delete and create destination training directories
     for dest in _training_destinations:
+        shutil.rmtree(os.path.join(training_path, dest))
         os.makedirs(os.path.join(training_path, dest, args.labels_dir), exist_ok=True)
         os.makedirs(os.path.join(training_path, dest, args.images_dir), exist_ok=True)
     logging.info(f"Training path: {training_path}")
@@ -71,12 +72,15 @@ def for_each_image(img_file_name, source_images_path, source_labels_path, traini
 
 # Parse and create label
 def process_label(label_file_path, dest_label_file_path):
-    src_file = open(label_file_path, 'r')
-    label_file_name = label_file_path.split("\\")[-1]
-    with open(os.path.join(dest_label_file_path, label_file_name), 'w') as dst_file:
-        for src_line in src_file.readlines():
-            cls_index, x1, y1, width, height = src_line.split()
-            dst_file.write(f"{cls_index} {x1} {y1} {width} {height}")
+    _ = shutil.copy2(label_file_path, dest_label_file_path)
+    # src_file = open(label_file_path, 'r')
+    # label_file_name = label_file_path.split("\\")[-1]
+    # with open(os.path.join(dest_label_file_path, label_file_name), 'w') as dst_file:
+    #     for src_line in src_file.readlines():
+    #         cls_index, x1, y1, width, height = src_line.split()
+    #         #if float(height) > 0.4:
+    #         #    logging.warn(label_file_path)
+    #         dst_file.write(f"{cls_index} {x1} {y1} {width} {height}\n")
 
 
 # Find destination for image

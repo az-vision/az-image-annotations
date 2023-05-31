@@ -28,9 +28,21 @@
             "name": "Train",
             "stopOnEntry": false,
             "type": "python",
-            "python": "${workspaceFolder}/.venv2/scripts/python.exe",
+            "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
             "program": "train.py",
+            "args": ["--epochs", "1"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Validate",
+            "stopOnEntry": false,
+            "type": "python",
+            "python": "${workspaceFolder}/.venv/scripts/python.exe",
+            "request": "launch",
+            "program": "train.py",
+            "args": ["--validate"],
             "console": "integratedTerminal",
             "justMyCode": true
         }
