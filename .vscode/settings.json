@@ -1,9 +1,12 @@
 {
     "cSpell.words": [
+        "bboxes",
         "columnspan",
         "cuda",
+        "disp",
         "Espace",
         "imgsz",
+        "initialdir",
         "ipadx",
         "ipady",
         "keepawake",
@@ -14,6 +17,7 @@
         "tcross",
         "textvariable",
         "tkimg",
+        "Trailings",
         "ultralytics",
         "wakepy",
         "xyxy",

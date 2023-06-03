@@ -1,5 +1,4 @@
 import ast
-import json
 import pathlib
 from tkinter import END, LEFT, N, RIGHT, S, W, E, StringVar, Tk
 from tkinter import filedialog, Button, Canvas, Entry, Frame, Label, Listbox
@@ -29,8 +28,8 @@ class LabelTool():
         self.cur = 0
         self.total = 0
         self.category = 0
-        self.imagename = ''
-        self.labelfilename = ''
+        self.imageName = ''
+        self.labelFileName = ''
         self.tkimg = None
         self.currentLabelClass = ''
         self.classesList = []
@@ -99,7 +98,6 @@ class LabelTool():
         self.rootPanel.bind("a", self.prevImage)  # press 'a' to go backward
         self.rootPanel.bind("d", self.nextImage)  # press 'd' to go forward
         self.rootPanel.bind("x", self.clearBBox)  # press 'x' to go forward
-
 
         # Class panel
         self.ctrClassPanel = Frame(self.rootPanel)
@@ -216,7 +214,8 @@ class LabelTool():
 
         for x1, y1, x2, y2, classIndex in xyxyList:
             bboxId = self.createBBox(x1, y1, x2, y2)
-            self.annotationsList.insert(END, f"{{'x1':{x1}, 'y1':{y1}, 'class': '{self.classesList[classIndex]}', 'x2': {x2}, 'y2': {y2}, 'bboxId':{bboxId}  }}")
+            box_string = f"{{'x1':{x1}, 'y1':{y1}, 'class': '{self.classesList[classIndex]}', 'x2': {x2}, 'y2': {y2}, 'bboxId':{bboxId}  }}"
+            self.annotationsList.insert(END, box_string)
 
     def getBoxesFromFile(self):
         annotationFilePath, imgWidth, imgHeight = self.get_annotations_metadata()
@@ -273,7 +272,7 @@ class LabelTool():
                 centerY = (annotation['y1'] + annotation['y2']) / 2. / imgHeight
                 height = abs(annotation['x1'] - annotation['x2']) * 1. / imgWidth
                 width = abs(annotation['y1'] - annotation['y2']) * 1. / imgHeight
-    
+
                 f.write(f'{class_} {centerX} {centerY} {height} {width}\n')
 
     def get_annotations_metadata(self):
@@ -298,7 +297,7 @@ class LabelTool():
         return bboxId
 
     def mouseMove(self, event):
-        self.disp.config(text='x: %d, y: %d' %(event.x, event.y))
+        self.disp.config(text=f'x: {event.x}, y: {event.y}')
 
         if self.tkimg[0]:
             if self.hl:
@@ -349,6 +348,7 @@ class LabelTool():
             self.saveImage()
             self.cur = idx
             self.loadImage()
+
 
 if __name__ == '__main__':
     root = Tk()

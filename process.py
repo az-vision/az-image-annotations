@@ -99,7 +99,8 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--data_repo", default="az-datasets", help="repository where annotation data are located")
     parser.add_argument("-a", "--annotations_dir", default="annotations",
                         help="directory relative to this file where annotations are stored")
-    parser.add_argument("-b", "--annotations_batch", default="2023-05-11-07_55_46-rgb-depth-fg_mask", help="annotations subdir name (batch of images)")
+    parser.add_argument("-b", "--annotations_batch", default="2023-05-11-07_55_46-rgb-depth-fg_mask",
+                        help="annotations subdir name (batch of images)")
     parser.add_argument("-l", "--labels_dir", default="labels", help="sub-directory of annotations where labels are")
     parser.add_argument("-i", "--images_dir", default="images", help="training images dir name")
     parser.add_argument("-s", "--img_filename_suffix", default="-rgb.jpg", help="suffix of file name to include as source images")
