@@ -47,6 +47,8 @@ def main(args, loglevel):
                 name=todays_model_name)
             _ = shutil.copytree(output_model_filepath, dest_models_dir)
 
+    # convert to  http://tools.luxonis.com/
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Train NN")
