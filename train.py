@@ -45,7 +45,7 @@ def main(args, loglevel):
                 epochs=int(args.epochs),
                 batch=8,
                 name=todays_model_name)
-            _ = shutil.copy2(output_model_filepath, dest_models_dir)
+            _ = shutil.copytree(output_model_filepath, dest_models_dir)
 
 
 if __name__ == '__main__':
