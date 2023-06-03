@@ -19,9 +19,9 @@ def main(args, loglevel):
 
     datasets_repo = os.path.join(pathlib.Path(__file__).parent.resolve().parent, 'az-datasets')
     todays_model_name = f'{args.model_name}{datetime.now().strftime("%Y-%m-%d_%H-%M")}'
-    output_model_filepath = os.path.join(pathlib.Path(__file__).parent.resolve(), f"runs\\detect\\{todays_model_name}\\weights", "best.pt")
+    output_model_filepath = os.path.join(pathlib.Path(__file__).parent.resolve(), f"runs\\detect\\{todays_model_name}")
     training_dir = os.path.join(datasets_repo, args.training_dir)
-    dest_models_dir = os.path.join(datasets_repo, args.models_dir)
+    dest_models_dir = os.path.join(datasets_repo, args.models_dir, todays_model_name)
     logging.info(f"Training path: {training_dir}")
 
     logging.info(f"CUDA is available: {torch.cuda.is_available()}")
@@ -46,7 +46,6 @@ def main(args, loglevel):
                 batch=8,
                 name=todays_model_name)
             _ = shutil.copy2(output_model_filepath, dest_models_dir)
-            _ = shutil.copy2(os.path.join(dest_models_dir, best_file_name), os.path.join(dest_models_dir, f"best-{datetime.now().isoformat()}.pt"))
 
 
 if __name__ == '__main__':

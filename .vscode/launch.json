@@ -31,7 +31,7 @@
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
             "program": "train.py",
-            "args": ["--epochs", "1"],
+            "args": ["--epochs", "90"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
