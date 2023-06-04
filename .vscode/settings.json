@@ -17,6 +17,7 @@
         "tcross",
         "textvariable",
         "tkimg",
+        "tqdm",
         "Trailings",
         "ultralytics",
         "wakepy",

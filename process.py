@@ -6,6 +6,9 @@ import logging
 import os
 import pathlib
 import shutil
+import cv2
+from tqdm import tqdm
+
 
 _training_destinations = ['train', 'valid', 'test']
 
@@ -22,6 +25,7 @@ def main(args, loglevel):
     source_labels_path = os.path.join(source_annotations_path, args.labels_dir)
     logging.info(f"Source labels path: {source_labels_path}")
     training_path = os.path.join(annotations_repo_path, args.training_dir)
+    logging.info(f'Transformation name: {args.transformation_name}')
 
     # Delete and create destination training directories
     for dest in _training_destinations:
@@ -31,18 +35,22 @@ def main(args, loglevel):
     logging.info(f"Training path: {training_path}")
 
     logging.info("Copying...")
-    source_images = [for_each_image(file_path, source_annotations_path, source_labels_path, training_path)
+    source_images = [file_path
                      for file_path
                      in os.listdir(source_annotations_path)
                      if file_path.endswith(args.img_filename_suffix)]
 
+    processed_images = []
+    for file_path in tqdm(source_images, desc="Processing..."):
+        processed_images.append(for_each_image(file_path, source_annotations_path, source_labels_path, training_path))
+
     logging.info(f"Images to be processed (suffix: '{args.img_filename_suffix}'): {len(source_images)}")
-    logging.info(f"Image not found: {len([x for x in source_images if x.get('r') == 'image not found'])}")
-    logging.info(f"Label not found: {len([x for x in source_images if x.get('r') == 'label not found'])}")
-    logging.info(f"Label contains annotations: {len([x for x in source_images if x.get('r') == 'annotations found'])}")
-    logging.info(f"Destination train: {len([x for x in source_images if x.get('dest') == 'train'])}")
-    logging.info(f"Destination valid: {len([x for x in source_images if x.get('dest') == 'valid'])}")
-    logging.info(f"Destination test: {len([x for x in source_images if x.get('dest') == 'test'])}")
+    logging.info(f"Image not found: {len([x for x in processed_images if x.get('r') == 'image not found'])}")
+    logging.info(f"Label not found: {len([x for x in processed_images if x.get('r') == 'label not found'])}")
+    logging.info(f"Label contains annotations: {len([x for x in processed_images if x.get('r') == 'annotations found'])}")
+    logging.info(f"Destination train: {len([x for x in processed_images if x.get('dest') == 'train'])}")
+    logging.info(f"Destination valid: {len([x for x in processed_images if x.get('dest') == 'valid'])}")
+    logging.info(f"Destination test: {len([x for x in processed_images if x.get('dest') == 'test'])}")
 
 
 def for_each_image(img_file_name, source_images_path, source_labels_path, training_dir):
@@ -62,7 +70,7 @@ def for_each_image(img_file_name, source_images_path, source_labels_path, traini
     destination = where_to_go(img_file_name)
 
     # Copy image to destination
-    _ = shutil.copy2(img_file_path, os.path.join(training_dir, destination, args.images_dir))
+    process_image(img_file_path, os.path.join(training_dir, destination, args.images_dir), img_file_name, args.transformation_name)
 
     # Copy label to destination
     process_label(label_file_path, os.path.join(training_dir, destination, args.labels_dir))
@@ -70,17 +78,27 @@ def for_each_image(img_file_name, source_images_path, source_labels_path, traini
     return {'r': "annotations found", 'dest': destination}
 
 
+def process_image(src_filepath, dest_dir, filename, transformation_name):
+    if transformation_name == 'rgb':
+        _ = shutil.copy2(src_filepath, dest_dir)
+
+    if transformation_name == 'bw':
+        image = cv2.imread(src_filepath)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        cv2.imwrite(os.path.join(dest_dir, filename), gray)
+
+
 # Parse and create label
-def process_label(label_file_path, dest_label_file_path):
-    _ = shutil.copy2(label_file_path, dest_label_file_path)
-    # src_file = open(label_file_path, 'r')
-    # label_file_name = label_file_path.split("\\")[-1]
-    # with open(os.path.join(dest_label_file_path, label_file_name), 'w') as dst_file:
-    #     for src_line in src_file.readlines():
-    #         cls_index, x1, y1, width, height = src_line.split()
-    #         #if float(height) > 0.4:
-    #         #    logging.warn(label_file_path)
-    #         dst_file.write(f"{cls_index} {x1} {y1} {width} {height}\n")
+def process_label(src, dest):
+    _ = shutil.copy2(src, dest)
+    src_file = open(src, 'r')
+    label_file_name = src.split("\\")[-1]
+    with open(os.path.join(dest, label_file_name), 'w') as dst_file:
+        for src_line in src_file.readlines():
+            cls_index, x1, y1, width, height = src_line.split()
+            #if float(height) > 0.4:
+            #    logging.warn(label_file_path)
+            dst_file.write(f"{cls_index} {x1} {y1} {width} {height}\n")
 
 
 # Find destination for image
@@ -105,6 +123,7 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--images_dir", default="images", help="training images dir name")
     parser.add_argument("-s", "--img_filename_suffix", default="-rgb.jpg", help="suffix of file name to include as source images")
     parser.add_argument("-t", "--training_dir", default="training", help="Directory where training (output) folder is located")
+    parser.add_argument("-r", "--transformation_name", default="rgb", help="Possible transformations: rgb, bw")
     args = parser.parse_args()
 
     # Setup logging

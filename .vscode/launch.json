@@ -21,6 +21,7 @@
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
             "program": "process.py",
+            "args": ["--transformation_name", "bw"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
@@ -31,7 +32,7 @@
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
             "program": "train.py",
-            "args": ["--epochs", "90"],
+            "args": ["--epochs", "1"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
