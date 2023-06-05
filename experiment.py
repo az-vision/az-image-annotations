@@ -11,6 +11,7 @@ from wakepy import keepawake
 import process
 import train
 
+
 def main(_args, loglevel):
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)
 
