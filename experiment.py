@@ -15,23 +15,26 @@ def main(_args, loglevel):
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)
 
     with keepawake(keep_screen_awake=False):
-
         task = Task.init(project_name='Footfall', task_name='process and train')
+
+        _, source_annotations_path, _, _ = process.get_paths(args)
+        log_dataset(source_annotations_path)
 
         # Process images
         process.main(args, loglevel)
 
-        _, source_annotations_path, _, _ = process.get_paths(args)
-
-        # Create a dataset with ClearML`s Dataset class
-        dataset = Dataset.create(
-            dataset_project="Footfall", dataset_name="heads"
-        )
-        dataset.add_files(path=source_annotations_path, recursive=True)
-        dataset.upload()
-        dataset.finalize()
-
+        # train new model
         train.main(args, loglevel)
+
+
+# Create a dataset with ClearML`s Dataset class
+def log_dataset(source_annotations_path):
+    dataset = Dataset.create(
+        dataset_project="Footfall", dataset_name="heads"
+    )
+    dataset.add_files(path=source_annotations_path, recursive=True)
+    dataset.upload()
+    dataset.finalize()
 
 
 if __name__ == '__main__':
