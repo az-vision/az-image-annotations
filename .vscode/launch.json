@@ -37,15 +37,18 @@
             "justMyCode": true
         },
         {
-            "name": "Validate",
+            "name": "Experiment",
             "stopOnEntry": false,
             "type": "python",
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
-            "program": "train.py",
-            "args": ["--validate"],
+            "program": "experiment.py",
+            "args": [
+                "--transformation_name", "bw",
+                "--epochs", "1"
+            ],
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        },
     ]
 }

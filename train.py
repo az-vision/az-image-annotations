@@ -11,6 +11,7 @@ from wakepy import keepawake
 import shutil
 from datetime import datetime
 
+
 best_file_name = "best.pt"
 
 
@@ -22,8 +23,8 @@ def main(args, loglevel):
     output_model_filepath = os.path.join(pathlib.Path(__file__).parent.resolve(), f"runs\\detect\\{todays_model_name}")
     training_dir = os.path.join(datasets_repo, args.training_dir)
     dest_models_dir = os.path.join(datasets_repo, args.models_dir, todays_model_name)
-    logging.info(f"Training path: {training_dir}")
 
+    logging.info(f"Training path: {training_dir}")
     logging.info(f"CUDA is available: {torch.cuda.is_available()}")
     logging.info(f"CUDA device count: {torch.cuda.device_count()}")
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--training_dir", default="training", help="Directory where training (output) folder is located")
     parser.add_argument("-m", "--models_dir", default="models", help="Directory where models are located")
     parser.add_argument("-n", "--model_name", default="heads", help="Name of model. Folder name where result will be stored.")
-    parser.add_argument("-e", "--epochs", default=300, help="Number of epochs to train")
+    parser.add_argument("-e", "--epochs", default=1, help="Number of epochs to train")
     parser.add_argument("-a", "--validate", help="Validate best result of training", action='store_true')
 
     args = parser.parse_args()

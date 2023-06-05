@@ -9,22 +9,15 @@ import shutil
 import cv2
 from tqdm import tqdm
 
-
 _training_destinations = ['train', 'valid', 'test']
 
 
 def main(args, loglevel):
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)
 
-    annotations_repo_path = os.path.join(str(pathlib.Path(__file__).parent.resolve().parent),  # parent dir
-                                         args.data_repo)
-    source_annotations_path = os.path.join(annotations_repo_path,
-                                           args.annotations_dir,
-                                           args.annotations_batch)
+    annotations_repo_path, source_annotations_path, source_labels_path, training_path = get_paths(args)
     logging.info(f"Source images path: {source_annotations_path}")
-    source_labels_path = os.path.join(source_annotations_path, args.labels_dir)
     logging.info(f"Source labels path: {source_labels_path}")
-    training_path = os.path.join(annotations_repo_path, args.training_dir)
     logging.info(f'Transformation name: {args.transformation_name}')
 
     # Delete and create destination training directories
@@ -42,7 +35,7 @@ def main(args, loglevel):
 
     processed_images = []
     for file_path in tqdm(source_images, desc="Processing..."):
-        processed_images.append(for_each_image(file_path, source_annotations_path, source_labels_path, training_path))
+        processed_images.append(for_each_image(file_path, source_annotations_path, source_labels_path, training_path, args.images_dir, args.transformation_name,  args.labels_dir))
 
     logging.info(f"Images to be processed (suffix: '{args.img_filename_suffix}'): {len(source_images)}")
     logging.info(f"Image not found: {len([x for x in processed_images if x.get('r') == 'image not found'])}")
@@ -53,7 +46,18 @@ def main(args, loglevel):
     logging.info(f"Destination test: {len([x for x in processed_images if x.get('dest') == 'test'])}")
 
 
-def for_each_image(img_file_name, source_images_path, source_labels_path, training_dir):
+def get_paths(args):
+    annotations_repo_path = os.path.join(str(pathlib.Path(__file__).parent.resolve().parent),  # parent dir
+                                         args.data_repo)
+    source_annotations_path = os.path.join(annotations_repo_path,
+                                           args.annotations_dir,
+                                           args.annotations_batch)
+    source_labels_path = os.path.join(source_annotations_path, args.labels_dir)
+    training_path = os.path.join(annotations_repo_path, args.training_dir)
+    return (annotations_repo_path, source_annotations_path, source_labels_path, training_path)
+
+
+def for_each_image(img_file_name, source_images_path, source_labels_path, training_dir, images_dir, transformation_name,  labels_dir):
     # Get image
     img_file_path = os.path.join(source_images_path, img_file_name)
     if os.path.isfile(img_file_path) is False:
@@ -70,10 +74,10 @@ def for_each_image(img_file_name, source_images_path, source_labels_path, traini
     destination = where_to_go(img_file_name)
 
     # Copy image to destination
-    process_image(img_file_path, os.path.join(training_dir, destination, args.images_dir), img_file_name, args.transformation_name)
+    process_image(img_file_path, os.path.join(training_dir, destination, images_dir), img_file_name, transformation_name)
 
     # Copy label to destination
-    process_label(label_file_path, os.path.join(training_dir, destination, args.labels_dir))
+    process_label(label_file_path, os.path.join(training_dir, destination, labels_dir))
 
     return {'r': "annotations found", 'dest': destination}
 
