@@ -44,7 +44,7 @@
             "request": "launch",
             "program": "experiment.py",
             "args": [
-                "--transformation_name", "bw",
+                "--transformation_name", "rgb",
                 "--epochs", "1"
             ],
             "console": "integratedTerminal",

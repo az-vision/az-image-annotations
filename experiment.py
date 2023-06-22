@@ -19,23 +19,26 @@ def main(_args, loglevel):
         task = Task.init(project_name='Footfall', task_name='process and train')
 
         _, source_annotations_path, _, _ = process.get_paths(args)
-        log_dataset(source_annotations_path)
+        dataset = create_dataset(source_annotations_path)
 
         # Process images
         process.main(args, loglevel)
 
         # train new model
-        train.main(args, loglevel)
+        dest_models_dir = train.main(args, loglevel)
+        dataset.add_files(dest_models_dir)
+        dataset.upload()
+        dataset.finalize()
 
 
 # Create a dataset with ClearML`s Dataset class
-def log_dataset(source_annotations_path):
+def create_dataset(source_annotations_path):
     dataset = Dataset.create(
         dataset_project="Footfall", dataset_name="heads"
     )
     dataset.add_files(path=source_annotations_path, recursive=True)
     dataset.upload()
-    dataset.finalize()
+    return dataset
 
 
 if __name__ == '__main__':

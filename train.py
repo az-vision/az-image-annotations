@@ -47,6 +47,7 @@ def main(args, loglevel):
                 batch=8,
                 name=todays_model_name)
             _ = shutil.copytree(output_model_filepath, dest_models_dir)
+            return dest_models_dir
 
     # convert to  http://tools.luxonis.com/
 
