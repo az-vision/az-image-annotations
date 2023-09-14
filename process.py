@@ -15,32 +15,34 @@ _training_destinations = ['train', 'valid', 'test']
 def main(args, loglevel):
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)
 
-    annotations_repo_path, source_annotations_path, source_labels_path, training_path = get_paths(args)
-    logging.info(f"Source images path: {source_annotations_path}")
-    logging.info(f"Source labels path: {source_labels_path}")
+    annotations_repo_path, source_annotations_paths, training_path = get_paths(args)
+    logging.info(f"Source images path: {source_annotations_paths}")
     logging.info(f'Transformation name: {args.transformation_name}')
 
     # Delete and create destination training directories
     for dest in _training_destinations:
-        shutil.rmtree(os.path.join(training_path, dest))
+        shutil.rmtree(os.path.join(training_path, dest), ignore_errors=True)
         os.makedirs(os.path.join(training_path, dest, args.labels_dir), exist_ok=True)
         os.makedirs(os.path.join(training_path, dest, args.images_dir), exist_ok=True)
     logging.info(f"Training path: {training_path}")
 
     logging.info("Copying...")
-    source_images = [file_path
-                     for file_path
-                     in os.listdir(source_annotations_path)
-                     if file_path.endswith(args.img_filename_suffix)]
+    source_images = []
+    for source_annotations_path in source_annotations_paths:
+        source_images += [os.path.join(source_annotations_path, file_path)
+                          for file_path
+                          in os.listdir(source_annotations_path)
+                          if file_path.endswith(args.img_filename_suffix)]
 
     processed_images = []
     for file_path in tqdm(source_images, desc="Processing..."):
-        processed_images.append(for_each_image(file_path, source_annotations_path, source_labels_path, training_path, args.images_dir, args.transformation_name,  args.labels_dir))
+        processed_images.append(for_each_image(file_path, source_annotations_path, training_path, args.images_dir, args.transformation_name,  args.labels_dir))
 
     logging.info(f"Images to be processed (suffix: '{args.img_filename_suffix}'): {len(source_images)}")
     logging.info(f"Image not found: {len([x for x in processed_images if x.get('r') == 'image not found'])}")
     logging.info(f"Label not found: {len([x for x in processed_images if x.get('r') == 'label not found'])}")
-    logging.info(f"Label contains annotations: {len([x for x in processed_images if x.get('r') == 'annotations found'])}")
+    logging.info(f"Label contains annotations: {sum([int(x.get('annotations_count')) for x in processed_images if x.get('annotations_count') != None])}")
+    logging.info(f"Annotations sum: {len([x for x in processed_images if x.get('r') == 'annotations found'])}")
     logging.info(f"Destination train: {len([x for x in processed_images if x.get('dest') == 'train'])}")
     logging.info(f"Destination valid: {len([x for x in processed_images if x.get('dest') == 'valid'])}")
     logging.info(f"Destination test: {len([x for x in processed_images if x.get('dest') == 'test'])}")
@@ -49,60 +51,65 @@ def main(args, loglevel):
 def get_paths(args):
     annotations_repo_path = os.path.join(str(pathlib.Path(__file__).parent.resolve().parent),  # parent dir
                                          args.data_repo)
-    source_annotations_path = os.path.join(annotations_repo_path,
-                                           args.annotations_dir,
-                                           args.annotations_batch)
-    source_labels_path = os.path.join(source_annotations_path, args.labels_dir)
+    source_annotations_paths = [os.path.join(annotations_repo_path, args.annotations_dir, batch_item) for batch_item in args.annotations_batch.split("|")]
+
     training_path = os.path.join(annotations_repo_path, args.training_dir)
-    return (annotations_repo_path, source_annotations_path, source_labels_path, training_path)
+    return (annotations_repo_path, source_annotations_paths, training_path)
 
 
-def for_each_image(img_file_name, source_images_path, source_labels_path, training_dir, images_dir, transformation_name,  labels_dir):
+def for_each_image(img_file_path, source_annotations_path, training_dir, images_dir, transformation_name,  labels_dir):
+    # Get parent folder name
+    source_folder_name = img_file_path.split(os.path.sep)[-2]
+    source_image_filename = os.path.basename(img_file_path)
+
     # Get image
-    img_file_path = os.path.join(source_images_path, img_file_name)
     if os.path.isfile(img_file_path) is False:
-        logging.warning(f"Image {img_file_name} does not exists.")
+        logging.warning(f"Image {img_file_path} does not exists.")
         return {'r': "image not found"}
 
     # Find corresponding label
-    label_filename = img_file_name.split('.')[0] + '.txt'
-    label_file_path = os.path.join(source_labels_path, label_filename)
+    label_filename = os.path.basename(img_file_path).split('.')[0] + '.txt'
+    directory_path = os.path.dirname(img_file_path)
+
+    label_file_path = os.path.join(directory_path, labels_dir, label_filename)
     if os.path.isfile(label_file_path) is False:
         return {'r': "label not found"}
 
     # Find destination for image
-    destination = where_to_go(img_file_name)
+    destination = where_to_go(img_file_path)
 
     # Copy image to destination
-    process_image(img_file_path, os.path.join(training_dir, destination, images_dir), img_file_name, transformation_name)
+    process_image(img_file_path, os.path.join(training_dir, destination, images_dir), f'{source_folder_name}-{source_image_filename}', transformation_name)
 
     # Copy label to destination
-    process_label(label_file_path, os.path.join(training_dir, destination, labels_dir))
+    annotations_count = process_label(label_file_path, os.path.join(training_dir, destination, labels_dir), f'{source_folder_name}-{label_filename}')
 
-    return {'r': "annotations found", 'dest': destination}
+    return {'r': "annotations found", 'dest': destination, 'annotations_count': annotations_count}
 
 
 def process_image(src_filepath, dest_dir, filename, transformation_name):
     if transformation_name == 'rgb':
-        _ = shutil.copy2(src_filepath, dest_dir)
+        image = cv2.imread(src_filepath)
+        resized = cv2.resize(image, (416, 416))
+        cv2.imwrite(os.path.join(dest_dir, filename), resized)
 
     if transformation_name == 'bw':
         image = cv2.imread(src_filepath)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        resized = cv2.resize(image, (416, 416))
+        gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
         cv2.imwrite(os.path.join(dest_dir, filename), gray)
 
 
 # Parse and create label
-def process_label(src, dest):
-    _ = shutil.copy2(src, dest)
+def process_label(src, dest, dest_filename):
+    annotations_count = 0
     src_file = open(src, 'r')
-    label_file_name = src.split("\\")[-1]
-    with open(os.path.join(dest, label_file_name), 'w') as dst_file:
+    with open(os.path.join(dest, dest_filename), 'w') as dst_file:
         for src_line in src_file.readlines():
             cls_index, x1, y1, width, height = src_line.split()
-            #if float(height) > 0.4:
-            #    logging.warn(label_file_path)
             dst_file.write(f"{cls_index} {x1} {y1} {width} {height}\n")
+            annotations_count += 1
+    return annotations_count
 
 
 # Find destination for image
@@ -121,8 +128,7 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--data_repo", default="az-datasets", help="repository where annotation data are located")
     parser.add_argument("-a", "--annotations_dir", default="annotations",
                         help="directory relative to this file where annotations are stored")
-    parser.add_argument("-b", "--annotations_batch", default="2023-05-11-07_55_46-rgb-depth-fg_mask",
-                        help="annotations subdir name (batch of images)")
+    parser.add_argument("-b", "--annotations_batch", help="annotations subdir name list (batch of images), separated by |")
     parser.add_argument("-l", "--labels_dir", default="labels", help="sub-directory of annotations where labels are")
     parser.add_argument("-i", "--images_dir", default="images", help="training images dir name")
     parser.add_argument("-s", "--img_filename_suffix", default="-rgb.jpg", help="suffix of file name to include as source images")

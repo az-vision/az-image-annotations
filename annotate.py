@@ -36,7 +36,7 @@ class LabelTool():
         self.classCandidateFilename = 'class.txt'
         self.data_repo = "az-datasets"
         self.annotations_dir = "annotations"
-        self.annotations_batch = "2023-05-11-07_55_46-rgb-depth-fg_mask"
+        self.annotations_batch = "2023-07-15-12_06_40-rgb-depth-fg_mask"
 
         self.data_repo_path = os.path.join(str(pathlib.Path(__file__).parent.resolve().parent),  # parent dir
                                            self.data_repo)
@@ -196,7 +196,8 @@ class LabelTool():
         self.tkimg = [0, 0, 0]
         # load image
         self.imgRootName = self.imageList[self.cur - 1]
-        for panelNo in range(0, 3):
+        no_of_panels = len(self.fileNameTrailings)
+        for panelNo in range(0, no_of_panels):
             imgFilePath = os.path.join(self.imageDir, self.imgRootName + self.fileNameTrailings[panelNo] + self.fileNameExt)
             self.tkimg[panelNo] = self.loadImgFromDisk(imgFilePath)
             self.mainPanels[panelNo].config(width=max(self.tkimg[panelNo].width(), 10), height=max(self.tkimg[panelNo].height(), 10))
@@ -292,7 +293,8 @@ class LabelTool():
             self.STATE = {}
 
     def createBBox(self, x1, y1, x2, y2):
-        for i in range(0, 3):
+        no_of_panels = len(self.fileNameTrailings)
+        for i in range(0, no_of_panels):
             bboxId = self.mainPanels[i].create_rectangle(x1, y1, x2, y2, width=2, outline=COLORS[0])
         return bboxId
 

@@ -44,13 +44,14 @@ def main(args, loglevel):
                 data=training_yaml_filepath,
                 imgsz=416,
                 epochs=int(args.epochs),
-                batch=8,
+                batch=64,
                 name=todays_model_name)
             _ = shutil.copytree(output_model_filepath, dest_models_dir)
             return dest_models_dir
 
     # convert to  http://tools.luxonis.com/
-
+    # RVC2, 5 shaves, use open VINO 2021.4 = false
+    # https://github.com/luxonis/tools/blob/master/main.py
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Train NN")
