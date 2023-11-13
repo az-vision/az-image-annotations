@@ -28,8 +28,8 @@ def main(args, loglevel):
     logging.info(f"CUDA is available: {torch.cuda.is_available()}")
     logging.info(f"CUDA device count: {torch.cuda.device_count()}")
 
-    # if torch.cuda.is_available() == False:
-    #     return
+    if torch.cuda.is_available() == False:
+        return
 
     # Load the model.
     model = YOLO(os.path.join(datasets_repo, 'models', best_file_name))
@@ -44,7 +44,7 @@ def main(args, loglevel):
                 data=training_yaml_filepath,
                 imgsz=416,
                 epochs=int(args.epochs),
-                batch=64,
+                batch=128,
                 name=todays_model_name)
             _ = shutil.copytree(output_model_filepath, dest_models_dir)
             return dest_models_dir

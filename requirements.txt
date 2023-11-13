@@ -1,7 +1,9 @@
-pillow == 9.5.0
-ultralytics == 8.0.99
+pillow==9.5.0
+ultralytics==8.0.208 #== 8.0.99
 wakepy
-clearml
+# clearml
 
-# for cuda enabled training
-# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# For CUDA enabled training
+# https://pytorch.org/get-started/locally/
+# Needs Python 3.9.13 https://www.python.org/downloads/release/python-3913/
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121/

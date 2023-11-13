@@ -126,7 +126,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Split images in folders for training")
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
     parser.add_argument("-d", "--data_repo", default="az-datasets", help="repository where annotation data are located")
-    parser.add_argument("-a", "--annotations_dir", default="annotations",
+    parser.add_argument("-a", "--annotations_dir", default="merged-files",
                         help="directory relative to this file where annotations are stored")
     parser.add_argument("-b", "--annotations_batch", help="annotations subdir name list (batch of images), separated by |")
     parser.add_argument("-l", "--labels_dir", default="labels", help="sub-directory of annotations where labels are")

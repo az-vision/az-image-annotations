@@ -35,8 +35,8 @@ class LabelTool():
         self.classesList = []
         self.classCandidateFilename = 'class.txt'
         self.data_repo = "az-datasets"
-        self.annotations_dir = "annotations"
-        self.annotations_batch = "2023-07-15-12_06_40-rgb-depth-fg_mask"
+        self.annotations_dir = "merged-files"
+        self.annotations_batch = "andel_500"
 
         self.data_repo_path = os.path.join(str(pathlib.Path(__file__).parent.resolve().parent),  # parent dir
                                            self.data_repo)
