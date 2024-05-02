@@ -131,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument("-b", "--annotations_batch", help="annotations subdir name list (batch of images), separated by |")
     parser.add_argument("-l", "--labels_dir", default="labels", help="sub-directory of annotations where labels are")
     parser.add_argument("-i", "--images_dir", default="images", help="training images dir name")
-    parser.add_argument("-s", "--img_filename_suffix", default="-rgb.jpg", help="suffix of file name to include as source images")
+    parser.add_argument("-s", "--img_filename_suffix", default=".jpg", help="suffix of file name to include as source images")
     parser.add_argument("-t", "--training_dir", default="training", help="Directory where training (output) folder is located")
     parser.add_argument("-r", "--transformation_name", default="rgb", help="Possible transformations: rgb, bw")
     args = parser.parse_args()

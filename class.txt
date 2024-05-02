@@ -1,1 +1,6 @@
-head
+generic
+woman
+man
+child
+stroller
+wheelchair

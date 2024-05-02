@@ -23,7 +23,7 @@
             "program": "process.py",
             "args": [
                 "--transformation_name", "rgb",
-                "--annotations_batch", "andel_500", 
+                "--annotations_batch", "melantrich_300|andel_450|chodov_320",
             ],
             "console": "integratedTerminal",
             "justMyCode": true

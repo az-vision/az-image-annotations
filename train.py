@@ -28,7 +28,7 @@ def main(args, loglevel):
     logging.info(f"CUDA is available: {torch.cuda.is_available()}")
     logging.info(f"CUDA device count: {torch.cuda.device_count()}")
 
-    if torch.cuda.is_available() == False:
+    if torch.cuda.is_available() is False:
         return
 
     # Load the model.
@@ -44,14 +44,18 @@ def main(args, loglevel):
                 data=training_yaml_filepath,
                 imgsz=416,
                 epochs=int(args.epochs),
-                batch=128,
-                name=todays_model_name)
+                batch=-1,
+                name=todays_model_name,
+                patience=0,
+                resume=True
+            )
             _ = shutil.copytree(output_model_filepath, dest_models_dir)
             return dest_models_dir
 
     # convert to  http://tools.luxonis.com/
     # RVC2, 5 shaves, use open VINO 2021.4 = false
     # https://github.com/luxonis/tools/blob/master/main.py
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Train NN")
