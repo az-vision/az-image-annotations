@@ -15,7 +15,7 @@ _training_destinations = ['train', 'valid', 'test']
 def main(args, loglevel):
     logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)
 
-    annotations_repo_path, source_annotations_paths, training_path = get_paths(args)
+    source_annotations_paths, training_path = get_paths(args)
     logging.info(f"Source images path: {source_annotations_paths}")
     logging.info(f'Transformation name: {args.transformation_name}')
 
@@ -49,12 +49,9 @@ def main(args, loglevel):
 
 
 def get_paths(args):
-    annotations_repo_path = os.path.join(str(pathlib.Path(__file__).parent.resolve().parent),  # parent dir
-                                         args.data_repo)
-    source_annotations_paths = [os.path.join(annotations_repo_path, args.annotations_dir, batch_item) for batch_item in args.annotations_batch.split("|")]
-
-    training_path = os.path.join(annotations_repo_path, args.training_dir)
-    return (annotations_repo_path, source_annotations_paths, training_path)
+    source_annotations_paths = [os.path.join(args.batches_path, args.annotations_dir, batch_item) for batch_item in args.annotations_batch.split("|")]
+    training_path = os.path.join(args.batches_path, args.training_dir)
+    return (source_annotations_paths, training_path)
 
 
 def for_each_image(img_file_path, source_annotations_path, training_dir, images_dir, transformation_name,  labels_dir):
@@ -90,7 +87,7 @@ def for_each_image(img_file_path, source_annotations_path, training_dir, images_
 def process_image(src_filepath, dest_dir, filename, transformation_name):
     if transformation_name == 'rgb':
         image = cv2.imread(src_filepath)
-        resized = cv2.resize(image, (416, 416))
+        resized = cv2.resize(image, (640, 352))
         cv2.imwrite(os.path.join(dest_dir, filename), resized)
 
     if transformation_name == 'bw':
@@ -125,9 +122,8 @@ def where_to_go(img_file_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Split images in folders for training")
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
-    parser.add_argument("-d", "--data_repo", default="az-datasets", help="repository where annotation data are located")
-    parser.add_argument("-a", "--annotations_dir", default="merged-files",
-                        help="directory relative to this file where annotations are stored")
+    parser.add_argument("-d", "--batches_path", default="C:\\azvision", help="repository where annotation data are located")
+    parser.add_argument("-a", "--annotations_dir", default="batches", help="directory relative to this file where annotations are stored")
     parser.add_argument("-b", "--annotations_batch", help="annotations subdir name list (batch of images), separated by |")
     parser.add_argument("-l", "--labels_dir", default="labels", help="sub-directory of annotations where labels are")
     parser.add_argument("-i", "--images_dir", default="images", help="training images dir name")

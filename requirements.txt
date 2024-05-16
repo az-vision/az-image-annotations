@@ -1,5 +1,5 @@
 pillow==9.5.0
-ultralytics==8.0.208 #== 8.0.99
+ultralytics==8.2.16  # 8.0.208
 wakepy
 # clearml
 

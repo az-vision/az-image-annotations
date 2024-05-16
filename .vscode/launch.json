@@ -5,25 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Annotate",
-            "stopOnEntry": false,
-            "type": "python",
-            "python": "${workspaceFolder}/.venv/scripts/python.exe",
-            "request": "launch",
-            "program": "annotate.py",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
             "name": "Process",
             "stopOnEntry": false,
-            "type": "python",
+            "type": "debugpy",
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
             "program": "process.py",
             "args": [
                 "--transformation_name", "rgb",
-                "--annotations_batch", "melantrich_300|andel_450|chodov_320",
+                "--annotations_batch", "batch-001|batch-002",
             ],
             "console": "integratedTerminal",
             "justMyCode": true
@@ -31,28 +21,13 @@
         {
             "name": "Train",
             "stopOnEntry": false,
-            "type": "python",
+            "type": "debugpy",
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
             "program": "train.py",
-            "args": ["--epochs", "300"],
+            "args": ["--epochs", "400"],
             "console": "integratedTerminal",
             "justMyCode": true
-        },
-        {
-            "name": "Experiment",
-            "stopOnEntry": false,
-            "type": "python",
-            "python": "${workspaceFolder}/.venv/scripts/python.exe",
-            "request": "launch",
-            "program": "experiment.py",
-            "args": [
-                "--annotations_batch", "2023-07-15-12_06_40-rgb-depth-fg_mask|2023-05-11-07_55_46-rgb-depth-fg_mask", 
-                "--transformation_name", "rgb", //rgb bw
-                "--epochs", "200"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
+        }
     ]
 }
