@@ -30,7 +30,10 @@ def main(args, loglevel):
     model = YOLO(args.src_model_filepath)
     training_yaml_filepath = os.path.join(training_dir, 'data.yaml')
 
-    # Training.
+    # Training
+    
+    # TODO: Add class weights
+    # https://github.com/ultralytics/ultralytics/pull/8557
     with keepawake(keep_screen_awake=False):
         if args.validate:
             _ = model.val(data=training_yaml_filepath)
