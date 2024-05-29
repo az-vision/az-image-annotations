@@ -59,6 +59,7 @@ def main(args, loglevel):
     # convert to  http://tools.luxonis.com/
     # RVC2, 5 shaves, use open VINO 2021.4 = false
     # https://github.com/luxonis/tools/blob/master/main.py
+    # https://github.com/luxonis/tools/blob/master/yolo/export_yolov8.py
 
 
 if __name__ == '__main__':
