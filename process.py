@@ -4,12 +4,12 @@
 import argparse
 import logging
 import os
-import pathlib
 import shutil
 import cv2
 from tqdm import tqdm
 
 _training_destinations = ['train', 'valid', 'test']
+cls_map = {0: 1, 1: 0, 2: 1, 3: 2, 4: 3, 5: None}
 
 
 def main(args, loglevel):
@@ -75,16 +75,20 @@ def for_each_image(img_file_path, source_annotations_path, training_dir, images_
     # Find destination for image
     destination = where_to_go(img_file_path)
 
-    # Copy image to destination
-    process_image(img_file_path, os.path.join(training_dir, destination, images_dir), f'{source_folder_name}-{source_image_filename}', transformation_name)
-
     # Copy label to destination
-    annotations_count = process_label(label_file_path, os.path.join(training_dir, destination, labels_dir), f'{source_folder_name}-{label_filename}')
+    annotations_count, contains_other_then_women = process_label(label_file_path, os.path.join(training_dir, destination, labels_dir), f'{source_folder_name}-{label_filename}')
+
+    # Copy image to destination
+    process_image(img_file_path, os.path.join(training_dir, destination, images_dir), f'{source_folder_name}-{source_image_filename}', transformation_name, contains_other_then_women)
 
     return {'r': "annotations found", 'dest': destination, 'annotations_count': annotations_count}
 
 
-def process_image(src_filepath, dest_dir, filename, transformation_name):
+def process_image(src_filepath, dest_dir, filename, transformation_name, contains_other_then_women):
+    # if contains_other_then_women is False:
+    #     os.remove(src_filepath)
+    #     return
+
     if transformation_name == 'rgb':
         image = cv2.imread(src_filepath)
         resized = cv2.resize(image, (640, 352))
@@ -101,12 +105,24 @@ def process_image(src_filepath, dest_dir, filename, transformation_name):
 def process_label(src, dest, dest_filename):
     annotations_count = 0
     src_file = open(src, 'r')
-    with open(os.path.join(dest, dest_filename), 'w') as dst_file:
+    dst_filepath = os.path.join(dest, dest_filename)
+    contains_other_than_woman = False
+    with open(dst_filepath, 'w') as dst_file:
         for src_line in src_file.readlines():
             cls_index, x1, y1, width, height = src_line.split()
-            dst_file.write(f"{cls_index} {x1} {y1} {width} {height}\n")
-            annotations_count += 1
-    return annotations_count
+            final_cls = cls_map[int(cls_index)]
+            if final_cls != 0:
+                contains_other_than_woman = True
+            if final_cls is not None:
+                dst_file.write(f"{final_cls} {x1} {y1} {width} {height}\n")
+                annotations_count += 1
+
+    src_file.close()
+
+    # if contains_other_than_woman is False:
+    #     os.remove(src_file.name)
+
+    return annotations_count, contains_other_than_woman
 
 
 # Find destination for image

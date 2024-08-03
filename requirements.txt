@@ -1,9 +1,15 @@
 pillow==9.5.0
-ultralytics==8.2.16  # 8.0.208
+ultralytics==8.2.45
 wakepy
 # clearml
 
 # For CUDA enabled training
 # https://pytorch.org/get-started/locally/
-# Needs Python 3.9.13 https://www.python.org/downloads/release/python-3913/
+# - uninstall existing:
+# pip uninstall torch torchvision
+# - install specific
 # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121/
+
+
+# Install Ultralytics from fork https://github.com/ultralytics/ultralytics/pull/8557
+# pip install git+https://github.com/hulkds/ultralytics.git

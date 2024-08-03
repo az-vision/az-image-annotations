@@ -13,7 +13,7 @@
             "program": "process.py",
             "args": [
                 "--transformation_name", "rgb",
-                "--annotations_batch", "batch-001|batch-002",
+                "--annotations_batch", "batch-001|batch-002|batch-003|batch-004|batch-005",
             ],
             "console": "integratedTerminal",
             "justMyCode": true
@@ -25,7 +25,24 @@
             "python": "${workspaceFolder}/.venv/scripts/python.exe",
             "request": "launch",
             "program": "train.py",
-            "args": ["--epochs", "400"],
+            "args": [
+                "--epochs", "400",
+                "--src_model", "yolov8n.pt"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Train hulkds",
+            "stopOnEntry": false,
+            "type": "debugpy",
+            "python": "${workspaceFolder}/.venv-hulkds/scripts/python.exe",
+            "request": "launch",
+            "program": "train.py",
+            "args": [
+                "--epochs", "400",
+                "--src_model", "C:\\Code\\Github\\az-image-annotations\\runs\\az-footfall-2024-05-30_10-06\\weights\\best.pt"
+                ],
             "console": "integratedTerminal",
             "justMyCode": true
         }
